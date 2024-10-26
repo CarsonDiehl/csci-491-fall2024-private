@@ -1,0 +1,21 @@
+<html lang="en">
+<head>
+    <title>TODO App</title>
+    <link rel="stylesheet" href="/css/pico.lime.css">
+    <link rel="stylesheet" href="/css/site.css">
+    <script src="/js/site.js"></script>
+    <script src="/js/Sortable.js"></script>
+
+</head>
+<body>
+<header class="container center">
+    <h1><img style="height: 60px" src="/img/todo-white.svg"> TODOApp</h1>
+    <form action="/todos">
+        <input style="float: right; width:300px" type="search" name="q" value="{{ search }}">
+    </form>
+</header>
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>

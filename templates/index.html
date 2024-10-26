@@ -1,16 +1,62 @@
-<html lang="en">
-<head>
-    <title>TODO App</title>
-    <link rel="stylesheet" href="/css/pico.lime.css">
-    <link rel="stylesheet" href="/css/site.css">
-    <script src="/js/site.js"></script>
-</head>
-<body>
-<header class="container center">
-    <h1><img style="height: 60px" src="/img/todo-white.svg"> TODOApp</h1>
-    <p>A blank canvas upon which to paint our dreams...</p>
-</header>
-<main class="container">
-</main>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+    <form action="/todos" method="post">
+        <label>
+            New Todo
+            <input {{ 'autofocus' if editing is undefined }} required type="text" name="todo" placeholder="Enter New Todo">
+        </label>
+        <input type="hidden" name="view" value="{{ view }}">
+    </form>
+    <a href="/todos/reorder"> Reorder Todos </a>
+    <ol>
+        {% for todo in todos %}
+            <li>
+            {% if todo.id == editing %}
+            <form method="post" action="/todos/{{ todo.id }}">
+                <input autofocus required type="text" value="{{ todo.text }}" name="todo">
+                <input type="hidden" name="view" value="{{ view }}">
+            </form>
+            {% else %}
+            <form action="/todos/{{ todo.id }}/toggle" method="post"
+            ondblclick="document.getElementById('edit-{{ todo.id }}').submit()">
+                <button style="all:unset">
+                    {% if todo.complete %}
+                        <img src="/img/todo-white.svg" width="20px">
+                    {% else %}
+                        <img src="/img/unchecked-white.svg" width="20px">
+                    {% endif %}
+                </button>
+            <input type="hidden" name="view" value="{{ view }}">
+            {% if todo.complete %}
+                <del>
+            {% endif %}
+            {{ todo.text }}
+            {% if todo.complete %}
+                </del>
+            {% endif %}
+            </form>
+            <form id="edit-{{ todo.id }}" action="/todos/{{ todo.id }}/edit" method="get">
+                <input type="hidden" name="view" value="{{ view }}">
+            </form>
+            {% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+    <nav>
+        <ul>
+            <li>
+                <a class="{{ 'contrast' if view == None }}" href="/todos">All</a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a class="{{ 'contrast' if view == 'active' }}" href="/todos?view=active">Active</a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a class="{{ 'contrast' if view == 'complete' }}" href="/todos?view=complete">Complete</a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

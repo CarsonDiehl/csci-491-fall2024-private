@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form action="/todos/reorder" method="post">
+    <ul id="todo-list" style="list-style: none">
+        {% for todo in todos %}
+            <li>
+            <span class="handle">
+                <img src="/img/draghandle.svg" width="20">
+            </span>
+            {{ todo.text }}
+            <input type="hidden" name="ids" value="{{ todo.id }}">
+            </li>
+        {% endfor %}
+    </ul>
+    <button>Save</button>
+    </form>
+
+    <script>
+    new Sortable(document.getElementById('todo-list'), {
+    handle: '.handle',
+        animation: 150
+    });
+    </script>
+{% endblock %}
