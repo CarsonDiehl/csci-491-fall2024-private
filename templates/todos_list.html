@@ -1,0 +1,11 @@
+<ol id="todos-list">
+    {% for todo in todos %}
+        <li>
+            {% if todo.complete %}
+                <del>{{ todo.text }}</del>
+            {% else %}
+                {{ todo.text }}
+            {% endif %}
+        </li>
+    {% endfor %}
+</ol>

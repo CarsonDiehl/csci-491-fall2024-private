@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template,redirect
-
+import time
 from src.model.todo import Todo, db
 
 app = Flask(__name__, static_url_path='', static_folder='static')
@@ -19,6 +19,10 @@ def _db_close(exc):
 def add_view_context(view):
     return ("?view=" + view) if view is not None else ""
 
+def get_the_marquee():
+    time.sleep(5)
+    return "Lazy loading is awesome and so are marquees"
+
 @app.route('/')
 def index():
     return redirect("/todos")
@@ -36,7 +40,8 @@ def toggle_todo(id):
     todo = Todo.find(int(id))
     todo.toggle_complete()
     todo.save()
-    return redirect("/todos" + (add_view_context(view)))
+    todos = Todo.all(view)
+    return render_template("main.html", todos=todos, view=view,editing=None)
 
 @app.get('/todos/<id>/edit')
 def edit_todo(id):
@@ -60,15 +65,19 @@ def show_reorder_ui():
 
 @app.post('/todos/reorder')
 def update_todo_order():
+    view = request.args.get('view', None)
     id_list = request.form.getlist('ids')
     Todo.reorder(id_list)
-    return redirect("/todos")
+    todos = Todo.all(view)
+    return render_template("main.html", todos=todos, view=view,editing=None)
 
 @app.get('/todos')
 def all_todos():
     view = request.args.get('view', None)
     search = request.args.get('q', None)
     todos = Todo.all(view, search)
+    if request.headers.get('HX-Request'):  # Check if request is from htmx
+        return render_template("todos_list.html", todos=todos)
     return render_template("index.html", todos=todos, view = view,search=search)
 
 

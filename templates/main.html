@@ -1,0 +1,62 @@
+<form action="/todos" method="post">
+    <label>
+        New Todo
+        <input {{ 'autofocus' if editing is undefined }} required type="text" name="todo" placeholder="Enter New Todo">
+    </label>
+    <input type="hidden" name="view" value="{{ view }}">
+</form>
+<a hx-get="/todos/reorder"
+   hx-target="#todos-list"
+   hx-swap="outerHTML"> Reorder Todos </a>
+<ol id="todos-list">
+    {% for todo in todos %}
+        <li>
+            {% if todo.id == editing %}
+                <form method="post" action="/todos/{{ todo.id }}">
+                    <input autofocus required type="text" value="{{ todo.text }}" name="todo">
+                    <input type="hidden" name="view" value="{{ view }}">
+                </form>
+            {% else %}
+                <form hx-post="/todos/{{ todo.id }}/toggle"
+                      hx-target="main"
+                      ondblclick="document.getElementById('edit-{{ todo.id }}').submit()">
+                    <button style="all:unset">
+                        {% if todo.complete %}
+                            <img src="/img/todo-white.svg" width="20px">
+                        {% else %}
+                            <img src="/img/unchecked-white.svg" width="20px">
+                        {% endif %}
+                    </button>
+                    <input type="hidden" name="view" value="{{ view }}">
+                    {% if todo.complete %}
+                        <del>
+                    {% endif %}
+                    {{ todo.text }}
+                    {% if todo.complete %}
+                        </del>
+                    {% endif %}
+                </form>
+                <form id="edit-{{ todo.id }}" action="/todos/{{ todo.id }}/edit" method="get">
+                    <input type="hidden" name="view" value="{{ view }}">
+                </form>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ol>
+<nav>
+    <ul>
+        <li>
+            <a class="{{ 'contrast' if view == None }}" href="/todos">All</a>
+        </li>
+    </ul>
+    <ul>
+        <li>
+            <a class="{{ 'contrast' if view == 'active' }}" href="/todos?view=active">Active</a>
+        </li>
+    </ul>
+    <ul>
+        <li>
+            <a class="{{ 'contrast' if view == 'complete' }}" href="/todos?view=complete">Complete</a>
+        </li>
+    </ul>
+</nav>

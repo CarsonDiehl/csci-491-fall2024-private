@@ -5,14 +5,29 @@
     <link rel="stylesheet" href="/css/site.css">
     <script src="/js/site.js"></script>
     <script src="/js/Sortable.js"></script>
+    <script src="/js/htmx-2.0.3.js"></script>
 
 </head>
 <body>
 <header class="container center">
     <h1><img style="height: 60px" src="/img/todo-white.svg"> TODOApp</h1>
-    <form action="/todos">
-        <input style="float: right; width:300px" type="search" name="q" value="{{ search }}">
-    </form>
+    <form action="/todos" method="get">
+    <input
+        style="float: right; width:300px"
+        type="search"
+        name="q"
+        placeholder="Search Todos"
+        hx-get="/todos"
+        hx-trigger="keyup changed delay:300ms"
+        hx-target="#todos-list"
+        hx-push-url="true"
+    >
+</form>
+    <div style="hieght: 108px"
+        hx-get="/marquee"
+        hx-trigger="load">
+        Loading....
+    </div>
 </header>
 <main class="container">
     {% block content %}{% endblock %}
