@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template,redirect
+from flask import Flask, request, render_template, redirect, jsonify
 import time
 from src.model.todo import Todo, db
 
@@ -30,7 +30,8 @@ def index():
 @app.post('/todos')
 def create_todos():
     view = request.form.get('view', None)
-    todo = Todo(text=request.form['todo'], complete=False)
+    priority = int(request.form.get('priority', 3))  # Default to 3 if not set
+    todo = Todo(text=request.form['todo'], complete=False, priority=priority)
     todo.save()
     return redirect("/todos" + (add_view_context(view)))
 
@@ -57,6 +58,19 @@ def update_todo(id):
     todo.save()
     return redirect("/todos" + (add_view_context(view)))
 
+@app.post('/todos/<id>/update')
+def update_todo_priority(id):
+    try:
+        todo = Todo.find(int(id))
+        todo.priority = int(request.form['priority'])  # Update the priority
+        todo.save()
+        todos = Todo.all(view)
+        return render_template("main.html", todos=todos, view=view, editing=None)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
 @app.get('/todos/reorder')
 def show_reorder_ui():
     view = request.args.get('view', None)
@@ -75,12 +89,32 @@ def update_todo_order():
 def all_todos():
     view = request.args.get('view', None)
     search = request.args.get('q', None)
-    todos = Todo.all(view, search)
-    if request.headers.get('HX-Request'):  # Check if request is from htmx
+    sort_order = request.args.get('sort', 'order')  # Default if no sort option is selected
+    # Modify query to handle sorting
+    if sort_order == 'priority_desc':
+        todos = Todo.select().order_by(Todo.priority.desc(), Todo.order)  # High to Low
+    elif sort_order == 'priority_asc':
+        todos = Todo.select().order_by(Todo.priority.asc(), Todo.order)  # Low to High
+    else:
+        todos = Todo.select().order_by(Todo.order)
+    if request.headers.get('HX-Request'):
         return render_template("todos_list.html", todos=todos)
-    return render_template("index.html", todos=todos, view = view,search=search)
+    return render_template("index.html", todos=todos, view=view, search=search)
 
 
+
+@app.post('/voice-input')
+def voice_input():
+    try:
+        data = request.get_json()
+        todo_text = data.get('todo', '').strip()
+        if not todo_text:
+            return jsonify({'error': 'No todo text provided'}), 400
+        todo = Todo(text=todo_text, complete=False)
+        todo.save()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(port=5000)

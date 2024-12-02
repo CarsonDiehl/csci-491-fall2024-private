@@ -13,10 +13,10 @@ class Todo(Model):
     text = CharField()
     complete = BooleanField()
     order = IntegerField(null=True)
+    priority = IntegerField(default=3)  # Priority, where 1 is highest and 3 is lowest
 
     def toggle_complete(self):
         self.complete = not self.complete
-
 
     @classmethod
     def all(cls, view, search=None):
@@ -27,7 +27,7 @@ class Todo(Model):
             select = select.where(Todo.complete == True)
         if search:
             select = select.where(Todo.text.ilike("%" + search + "%"))
-        return select.order_by(Todo.order)
+        return select.order_by(Todo.priority, Todo.order)  # Order by priority first
 
     @classmethod
     def find(cls, todo_id):
@@ -41,7 +41,6 @@ class Todo(Model):
             todo.order = i
             i = i + 1
             todo.save()
-
 
     class Meta:
         database = db

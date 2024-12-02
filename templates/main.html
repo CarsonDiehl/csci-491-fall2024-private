@@ -1,48 +1,84 @@
-<form action="/todos" method="post">
+<form action="/todos" method="post" id="todo-form">
     <label>
         New Todo
-        <input {{ 'autofocus' if editing is undefined }} required type="text" name="todo" placeholder="Enter New Todo">
+        <input
+            {{ 'autofocus' if editing is undefined }}
+            required
+            type="text"
+            name="todo"
+            placeholder="Enter New Todo"
+            id="todo-input">
     </label>
+    <button type="button" id="voice-button">
+        <img src="/img/microphone-icon.svg" alt="Voice Input" width="20">
+    </button>
     <input type="hidden" name="view" value="{{ view }}">
 </form>
+
+<!-- Sorting dropdown -->
+<form method="get" action="/todos" id="sort-form">
+    <label for="sort-order">Sort by:</label>
+    <select name="sort" id="sort-order" onchange="this.form.submit()">
+        <option value="priority_desc" {% if request.args.get('sort') == 'priority_desc' %}selected{% endif %}>
+            Priority (Low to High)
+        </option>
+        <option value="priority_asc" {% if request.args.get('sort') == 'priority_asc' %}selected{% endif %}>
+            Priority (High to Low)
+        </option>
+        <option value="order" {% if request.args.get('sort') == 'order' %}selected{% endif %}>
+            Default Order
+        </option>
+    </select>
+</form>
+
 <a hx-get="/todos/reorder"
    hx-target="#todos-list"
    hx-swap="outerHTML"> Reorder Todos </a>
 <ol id="todos-list">
     {% for todo in todos %}
-        <li>
-            {% if todo.id == editing %}
-                <form method="post" action="/todos/{{ todo.id }}">
-                    <input autofocus required type="text" value="{{ todo.text }}" name="todo">
-                    <input type="hidden" name="view" value="{{ view }}">
-                </form>
-            {% else %}
-                <form hx-post="/todos/{{ todo.id }}/toggle"
-                      hx-target="main"
-                      ondblclick="document.getElementById('edit-{{ todo.id }}').submit()">
-                    <button style="all:unset">
-                        {% if todo.complete %}
-                            <img src="/img/todo-white.svg" width="20px">
-                        {% else %}
-                            <img src="/img/unchecked-white.svg" width="20px">
-                        {% endif %}
-                    </button>
-                    <input type="hidden" name="view" value="{{ view }}">
+    <li>
+        {% if todo.id == editing %}
+            <form method="post" action="/todos/{{ todo.id }}">
+                <input autofocus required type="text" value="{{ todo.text }}" name="todo">
+                <input type="hidden" name="view" value="{{ view }}">
+            </form>
+        {% else %}
+            <form hx-post="/todos/{{ todo.id }}/toggle"
+                  hx-target="main"
+                  ondblclick="document.getElementById('edit-{{ todo.id }}').submit()">
+                <button style="all:unset">
                     {% if todo.complete %}
-                        <del>
+                        <img src="/img/todo-white.svg" width="20px">
+                    {% else %}
+                        <img src="/img/unchecked-white.svg" width="20px">
                     {% endif %}
+                </button>
+                <input type="hidden" name="view" value="{{ view }}">
+                {% if todo.complete %}
+                    <del>{{ todo.text }}</del>
+                {% else %}
                     {{ todo.text }}
-                    {% if todo.complete %}
-                        </del>
-                    {% endif %}
-                </form>
-                <form id="edit-{{ todo.id }}" action="/todos/{{ todo.id }}/edit" method="get">
-                    <input type="hidden" name="view" value="{{ view }}">
-                </form>
-            {% endif %}
-        </li>
-    {% endfor %}
+                {% endif %}
+            </form>
+            <form id="edit-{{ todo.id }}" action="/todos/{{ todo.id }}/edit" method="get">
+                <input type="hidden" name="view" value="{{ view }}">
+            </form>
+
+            <!-- Priority selection form -->
+            <form hx-post="/todos/{{ todo.id }}/update" hx-target="main" method="post">
+                <label for="priority-{{ todo.id }}">Priority</label>
+                <select name="priority" id="priority-{{ todo.id }}">
+                    <option value="1" {% if todo.priority == 1 %} selected {% endif %}>High</option>
+                    <option value="2" {% if todo.priority == 2 %} selected {% endif %}>Medium</option>
+                    <option value="3" {% if todo.priority == 3 %} selected {% endif %}>Low</option>
+                </select>
+                <button type="submit">Save</button>
+            </form>
+        {% endif %}
+    </li>
+{% endfor %}
 </ol>
+
 <nav>
     <ul>
         <li>
@@ -60,3 +96,38 @@
         </li>
     </ul>
 </nav>
+
+<script>
+    document.getElementById("voice-button").addEventListener("click", () => {
+        if (!("webkitSpeechRecognition" in window)) {
+            alert("Sorry, your browser does not support voice input.");
+            return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "en-US";
+        recognition.interimResults = false;
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            console.log("Voice input:", transcript);
+
+            // Send the transcript to the Flask backend
+            fetch('/voice-input', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ todo: transcript }),
+            }).then(response => {
+                if (response.ok) {
+                    location.reload(); // Reload the page to reflect the new todo
+                } else {
+                    alert('Failed to add todo from voice input.');
+                }
+            });
+        };
+
+        recognition.start();
+    });
+</script>
