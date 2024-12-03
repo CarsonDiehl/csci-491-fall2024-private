@@ -58,7 +58,7 @@
 
 <!-- Tag filter dropdown -->
 <form method="get" action="/todos" id="filter-by-tag">
-    <label for="sort-order">Sort by:</label>
+    <label for="sort-order">Filter:</label>
     <select name="tag_filter" id="tag_filter" onchange="this.form.submit()">
         <option value="default" {% if request.args.get('tag_filter') is none or request.args.get('tag_filter') == 'default' %}selected{% endif %}>
             Filter by tag...
