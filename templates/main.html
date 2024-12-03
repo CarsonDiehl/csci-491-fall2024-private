@@ -49,7 +49,7 @@
         <option value="priority_asc" {% if request.args.get('sort') == 'priority_asc' %}selected{% endif %}>
             Priority (High to Low)
         </option>
-        <option value="order" {% if request.args.get('sort') == 'order' %}selected{% endif %}>
+        <option value="order" {% if request.args.get('sort') == 'order' or request.args.get('sort') is none %}selected{% endif %}>
             Default Order
         </option>
     </select>

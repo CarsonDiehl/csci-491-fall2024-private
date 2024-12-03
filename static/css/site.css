@@ -88,3 +88,47 @@ input[type="color"] {
     border: none; /* Optional: Remove border */
     cursor: pointer; /* Indicate interactivity */
 }
+
+/* General priority styles */
+.priority {
+    font-style: italic;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-left: 0.5rem;
+}
+
+/* High priority */
+.priority-1 {
+    color: #fff;
+    background-color: #AA0000;
+}
+
+/* Medium priority */
+.priority-2 {
+    color: #fff;
+    background-color: #7A7A09;
+}
+
+/* Low priority */
+.priority-3 {
+    color: #fff;
+    background-color: #186318;
+}
+
+/* Tag styles */
+ul.tags {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+ul.tags .tag {
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    background-color: #f0f0f0;
+    font-size: 0.9rem;
+}

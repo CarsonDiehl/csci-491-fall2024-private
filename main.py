@@ -43,7 +43,18 @@ def toggle_todo(id):
     todo = Todo.find(int(id))
     todo.toggle_complete()
     todo.save()
-    todos = Todo.all(view)
+    query = Todo.all(view)
+    sort_order= request.args.get('sort', 'order')  # Default if no sort option is selected
+
+    # Modify query to handle sorting
+    if sort_order == 'priority_desc':
+        todos = query.order_by(Todo.priority.desc(), Todo.order)  # High to Low
+    elif sort_order == 'priority_asc':
+        todos = query.order_by(Todo.priority.asc(), Todo.order)  # Low to High
+    else:
+        todos = query.order_by(Todo.order)
+    for todo in todos:
+        todo.resolved_tags = [Tag.get_by_id(tag_id) for tag_id in todo.tags]
     return render_template("main.html", todos=todos, view=view,editing=None)
 
 @app.get('/todos/<id>/edit')
@@ -74,7 +85,16 @@ def update_todo_order():
     view = request.args.get('view', None)
     id_list = request.form.getlist('ids')
     Todo.reorder(id_list)
-    todos = Todo.all(view)
+    query = Todo.all(view)
+    sort_order = request.args.get('sort', 'order')  # Default if no sort option is selected
+
+    # Modify query to handle sorting
+    if sort_order == 'priority_desc':
+        todos = query.order_by(Todo.priority.desc(), Todo.order)  # High to Low
+    elif sort_order == 'priority_asc':
+        todos = query.order_by(Todo.priority.asc(), Todo.order)  # Low to High
+    else:
+        todos = query.order_by(Todo.order)
     for todo in todos:
         todo.resolved_tags = [Tag.get_by_id(tag_id) for tag_id in todo.tags]
     return render_template("main.html", todos=todos, view=view,editing=None)
@@ -94,7 +114,6 @@ def all_todos():
             fn.json_extract(Todo.tags, '$').contains(tag_filter)
         )
 
-    print(query)
     # Modify query to handle sorting
     if sort_order == 'priority_desc':
         todos = query.order_by(Todo.priority.desc(), Todo.order)  # High to Low

@@ -37,36 +37,42 @@
                   ondblclick="document.getElementById('edit-{{ todo.id }}').submit()">
                 <button style="all:unset">
                     {% if todo.complete %}
-                        <img src="/img/todo-white.svg" width="20px">
+                        <img src="/img/todo.svg" width="20px">
                     {% else %}
-                        <img src="/img/unchecked-white.svg" width="20px">
+                        <img src="/img/unchecked.svg" width="20px">
                     {% endif %}
                 </button>
                 <input type="hidden" name="view" value="{{ view }}">
                 {% if todo.complete %}
                     <del>{{ todo.text }}</del>
-                {% if todo.priority== 1 %} <em style="color:red">Priority: High</em>{% endif %}
-                {% if todo.priority== 2 %} <em style="color:yellow">Priority: Medium</em>{% endif %}
-                {% if todo.priority== 3 %} <em style="color:green">Priority: Low</em>{% endif %}
+                <span class="priority priority-{{ todo.priority }}">
+                    {% if todo.priority== 1 %} Priority: High {% endif %}
+                    {% if todo.priority== 2 %} Priority: Medium {% endif %}
+                    {% if todo.priority== 3 %} Priority: Low {% endif %}
+                </span>
+
                 <ul>
                     {% for tag in todo.resolved_tags %}
-                    <li style="color: {{ tag.color }}">{{ tag.name }}</li>
+                    <li class="tag" style="color: {{ tag.color }}">{{ tag.name }}</li>
                     {% endfor %}
                 </ul>
                 {% else %}
                     {{ todo.text }}
-                {% if todo.priority== 1 %} <em style="color:red">Priority: High</em>{% endif %}
-                {% if todo.priority== 2 %} <em style="color:yellow">Priority: Medium</em>{% endif %}
-                {% if todo.priority== 3 %} <em style="color:green">Priority: Low</em>{% endif %}
+                <span class="priority priority-{{ todo.priority }}">
+                    {% if todo.priority== 1 %} Priority: High {% endif %}
+                    {% if todo.priority== 2 %} Priority: Medium {% endif %}
+                    {% if todo.priority== 3 %} Priority: Low {% endif %}
+                </span>
                 <ul>
                     {% for tag in todo.resolved_tags %}
-                    <li style="color: {{ tag.color }}">{{ tag.name }}</li>
+                    <li class="tag" style="color: {{ tag.color }}">{{ tag.name }}</li>
                     {% endfor %}
                 </ul>
                 {% endif %}
             </form>
             <form id="edit-{{ todo.id }}" action="/todos/{{ todo.id }}/edit" method="get">
                 <input type="hidden" name="view" value="{{ view }}">
+                <input type="hidden" name="sort" value="{{ request.args.get('sort', 'order') }}">
             </form>
 
 
