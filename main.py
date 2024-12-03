@@ -55,22 +55,9 @@ def update_todo(id):
     view = request.form.get('view', None)
     todo = Todo.find(int(id))
     todo.text = request.form['todo']
+    todo.priority = int(request.form['priority'])  # Update the priority
     todo.save()
     return redirect("/todos" + (add_view_context(view)))
-
-@app.post('/todos/<id>/update')
-def update_todo_priority(id):
-    try:
-        view = request.form.get('view', None)
-        todo = Todo.find(int(id))
-        todo.priority = int(request.form['priority'])  # Update the priority
-        todo.save()
-        todos = Todo.all(view)
-        return redirect("/todos")
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
 
 @app.get('/todos/reorder')
 def show_reorder_ui():

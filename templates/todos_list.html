@@ -3,17 +3,21 @@
     <li>
         {% if todo.id == editing %}
         <form method="post" action="/todos/{{ todo.id }}">
-            <input autofocus required type="text" value="{{ todo.text }}" name="todo">
-            <input type="hidden" name="view" value="{{ view }}">
-        </form>
-        <!-- Priority selection form -->
-        <form hx-post="/todos/{{ todo.id }}/update" hx-target="main" method="post">
+            <label for="todo-text-{{ todo.id }}">TODO</label>
+            <input id="todo-text-{{ todo.id }}" required type="text" value="{{ todo.text }}" name="todo" placeholder="Enter TODO text" autofocus>
+
+            <!-- Priority selection -->
             <label for="priority-{{ todo.id }}">Priority</label>
             <select name="priority" id="priority-{{ todo.id }}">
                 <option value="1" {% if todo.priority== 1 %} selected {% endif %}>High</option>
                 <option value="2" {% if todo.priority== 2 %} selected {% endif %}>Medium</option>
                 <option value="3" {% if todo.priority== 3 %} selected {% endif %}>Low</option>
             </select>
+
+            <!-- Hidden view field -->
+            <input type="hidden" name="view" value="{{ view }}">
+
+            <!-- Save button -->
             <button type="submit">Save</button>
         </form>
         {% else %}
