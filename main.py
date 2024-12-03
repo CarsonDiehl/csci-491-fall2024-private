@@ -66,7 +66,7 @@ def update_todo_priority(id):
         todo.priority = int(request.form['priority'])  # Update the priority
         todo.save()
         todos = Todo.all(view)
-        return render_template("main.html", todos=todos, view=view, editing=None)
+        return redirect("/todos")
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

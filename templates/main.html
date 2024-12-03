@@ -58,57 +58,7 @@
 <a hx-get="/todos/reorder"
    hx-target="#todos-list"
    hx-swap="outerHTML"> Reorder Todos </a>
-<ol id="todos-list">
-    {% for todo in todos %}
-    <li>
-        {% if todo.id == editing %}
-        <form method="post" action="/todos/{{ todo.id }}">
-            <input autofocus required type="text" value="{{ todo.text }}" name="todo">
-            <input type="hidden" name="view" value="{{ view }}">
-        </form>
-        <!-- Priority selection form -->
-        <form hx-post="/todos/{{ todo.id }}/update" hx-target="main" method="post">
-            <label for="priority-{{ todo.id }}">Priority</label>
-            <select name="priority" id="priority-{{ todo.id }}">
-                <option value="1" {% if todo.priority== 1 %} selected {% endif %}>High</option>
-                <option value="2" {% if todo.priority== 2 %} selected {% endif %}>Medium</option>
-                <option value="3" {% if todo.priority== 3 %} selected {% endif %}>Low</option>
-            </select>
-            <button type="submit">Save</button>
-        </form>
-        {% else %}
-            <form hx-post="/todos/{{ todo.id }}/toggle"
-                  hx-target="main"
-                  ondblclick="document.getElementById('edit-{{ todo.id }}').submit()">
-                <button style="all:unset">
-                    {% if todo.complete %}
-                        <img src="/img/todo-white.svg" width="20px">
-                    {% else %}
-                        <img src="/img/unchecked-white.svg" width="20px">
-                    {% endif %}
-                </button>
-                <input type="hidden" name="view" value="{{ view }}">
-                {% if todo.complete %}
-                    <del>{{ todo.text }}</del>
-                {% if todo.priority== 1 %} <em style="color:red">Priority: High</em>{% endif %}
-                {% if todo.priority== 2 %} <em style="color:yellow">Priority: Medium</em>{% endif %}
-                {% if todo.priority== 3 %} <em style="color:green">Priority: Low</em>{% endif %}
-                {% else %}
-                    {{ todo.text }}
-                {% if todo.priority== 1 %} <em style="color:red">Priority: High</em>{% endif %}
-                {% if todo.priority== 2 %} <em style="color:yellow">Priority: Medium</em>{% endif %}
-                {% if todo.priority== 3 %} <em style="color:green">Priority: Low</em>{% endif %}
-                {% endif %}
-            </form>
-            <form id="edit-{{ todo.id }}" action="/todos/{{ todo.id }}/edit" method="get">
-                <input type="hidden" name="view" value="{{ view }}">
-            </form>
-
-
-        {% endif %}
-    </li>
-{% endfor %}
-</ol>
+{% block content %}{% include "todos_list.html" %}{% endblock %}
 
 <nav>
     <ul>
