@@ -78,12 +78,14 @@ def update_todo(id):
 def show_reorder_ui():
     view = request.args.get('view', None)
     todos = Todo.all(view)
+    todos = todos.order_by(Todo.order)
     return render_template("reorder.html", todos=todos)
 
 @app.post('/todos/reorder')
 def update_todo_order():
     view = request.args.get('view', None)
     id_list = request.form.getlist('ids')
+    tags = Tag.all()
     Todo.reorder(id_list)
     query = Todo.all(view)
     sort_order = request.args.get('sort', 'order')  # Default if no sort option is selected
@@ -97,7 +99,7 @@ def update_todo_order():
         todos = query.order_by(Todo.order)
     for todo in todos:
         todo.resolved_tags = [Tag.get_by_id(tag_id) for tag_id in todo.tags]
-    return render_template("main.html", todos=todos, view=view,editing=None)
+    return render_template("main.html", todos=todos, view=view,editing=None, tags=tags)
 
 @app.get('/todos')
 def all_todos():

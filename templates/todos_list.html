@@ -51,7 +51,7 @@
                     {% if todo.priority== 3 %} Priority: Low {% endif %}
                 </span>
 
-                <ul>
+                <ul class="tags">
                     {% for tag in todo.resolved_tags %}
                     <li class="tag" style="color: {{ tag.color }}">{{ tag.name }}</li>
                     {% endfor %}
@@ -63,7 +63,7 @@
                     {% if todo.priority== 2 %} Priority: Medium {% endif %}
                     {% if todo.priority== 3 %} Priority: Low {% endif %}
                 </span>
-                <ul>
+                <ul class="tags">
                     {% for tag in todo.resolved_tags %}
                     <li class="tag" style="color: {{ tag.color }}">{{ tag.name }}</li>
                     {% endfor %}
