@@ -30,8 +30,9 @@ def index():
 @app.post('/todos')
 def create_todos():
     view = request.form.get('view', None)
+    selected_tags = request.form.getlist('tags')  # Get selected tag IDs as a list
     priority = int(request.form.get('priority', 3))  # Default to 3 if not set
-    todo = Todo(text=request.form['todo'], complete=False, priority=priority)
+    todo = Todo(text=request.form['todo'], complete=False, priority=priority, tags=[int(tag_id) for tag_id in selected_tags])
     todo.save()
     return redirect("/todos" + (add_view_context(view)))
 
@@ -85,6 +86,9 @@ def all_todos():
         todos = Todo.all(view,search).order_by(Todo.priority.asc(), Todo.order)  # Low to High
     else:
         todos = Todo.all(view,search).order_by(Todo.order)
+    # Resolve tag names for each TODO
+    for todo in todos:
+        todo.resolved_tags = [Tag.get_by_id(tag_id) for tag_id in todo.tags]
     if request.headers.get('HX-Request'):
         return render_template("todos_list.html", todos=todos)
     tags=Tag.all()

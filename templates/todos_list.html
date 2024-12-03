@@ -42,6 +42,11 @@
                 {% if todo.priority== 1 %} <em style="color:red">Priority: High</em>{% endif %}
                 {% if todo.priority== 2 %} <em style="color:yellow">Priority: Medium</em>{% endif %}
                 {% if todo.priority== 3 %} <em style="color:green">Priority: Low</em>{% endif %}
+                <ul>
+                    {% for tag in todo.resolved_tags %}
+                    <li style="color: {{ tag.color }}">{{ tag.name }}</li>
+                    {% endfor %}
+                </ul>
                 {% endif %}
             </form>
             <form id="edit-{{ todo.id }}" action="/todos/{{ todo.id }}/edit" method="get">

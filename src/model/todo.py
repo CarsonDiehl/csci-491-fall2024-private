@@ -1,6 +1,6 @@
 from peewee import *
 import logging
-
+from playhouse.sqlite_ext import JSONField
 
 db = SqliteDatabase('todos.db')
 
@@ -14,6 +14,7 @@ class Todo(Model):
     complete = BooleanField()
     order = IntegerField(null=True)
     priority = IntegerField(default=3)  # Priority, where 1 is highest and 3 is lowest
+    tags = JSONField(default=list)  # Store tag IDs as a list
 
     def toggle_complete(self):
         self.complete = not self.complete
