@@ -2,18 +2,42 @@
     <label>
         New Todo
         <input
-            {{ 'autofocus' if editing is undefined }}
-            required
-            type="text"
-            name="todo"
-            placeholder="Enter New Todo"
-            id="todo-input">
+                {{ 'autofocus' if editing is undefined }}
+        required
+        type="text"
+        name="todo"
+        placeholder="Enter New Todo"
+        id="todo-input">
     </label>
     <button type="button" id="voice-button">
         <img src="/img/microphone-icon.svg" alt="Voice Input" width="20">
     </button>
     <input type="hidden" name="view" value="{{ view }}">
+    <div class="tag-container">
+        {% for tag in tags %}
+        <label class="tag-label" style="--tag-color: {{ tag.color }}">
+            <input type="checkbox"
+                   name="tags"
+                   value="{{ tag.id }}"
+                   class="tag-checkbox">
+            <span class="tag-button">
+            {{ tag.name }}
+        </span>
+        </label>
+        {% endfor %}
+    </div>
 </form>
+
+<div>
+    <button type="button"
+            class="tag-button"
+            hx-get="/new_tag"
+            hx-swap="outerHTML">
+        + Add Tag
+    </button>
+    <br>
+</div>
+
 
 <!-- Sorting dropdown -->
 <form method="get" action="/todos" id="sort-form">
@@ -38,10 +62,20 @@
     {% for todo in todos %}
     <li>
         {% if todo.id == editing %}
-            <form method="post" action="/todos/{{ todo.id }}">
-                <input autofocus required type="text" value="{{ todo.text }}" name="todo">
-                <input type="hidden" name="view" value="{{ view }}">
-            </form>
+        <form method="post" action="/todos/{{ todo.id }}">
+            <input autofocus required type="text" value="{{ todo.text }}" name="todo">
+            <input type="hidden" name="view" value="{{ view }}">
+        </form>
+        <!-- Priority selection form -->
+        <form hx-post="/todos/{{ todo.id }}/update" hx-target="main" method="post">
+            <label for="priority-{{ todo.id }}">Priority</label>
+            <select name="priority" id="priority-{{ todo.id }}">
+                <option value="1" {% if todo.priority== 1 %} selected {% endif %}>High</option>
+                <option value="2" {% if todo.priority== 2 %} selected {% endif %}>Medium</option>
+                <option value="3" {% if todo.priority== 3 %} selected {% endif %}>Low</option>
+            </select>
+            <button type="submit">Save</button>
+        </form>
         {% else %}
             <form hx-post="/todos/{{ todo.id }}/toggle"
                   hx-target="main"
@@ -56,24 +90,21 @@
                 <input type="hidden" name="view" value="{{ view }}">
                 {% if todo.complete %}
                     <del>{{ todo.text }}</del>
+                {% if todo.priority== 1 %} <em style="color:red">Priority: High</em>{% endif %}
+                {% if todo.priority== 2 %} <em style="color:yellow">Priority: Medium</em>{% endif %}
+                {% if todo.priority== 3 %} <em style="color:green">Priority: Low</em>{% endif %}
                 {% else %}
                     {{ todo.text }}
+                {% if todo.priority== 1 %} <em style="color:red">Priority: High</em>{% endif %}
+                {% if todo.priority== 2 %} <em style="color:yellow">Priority: Medium</em>{% endif %}
+                {% if todo.priority== 3 %} <em style="color:green">Priority: Low</em>{% endif %}
                 {% endif %}
             </form>
             <form id="edit-{{ todo.id }}" action="/todos/{{ todo.id }}/edit" method="get">
                 <input type="hidden" name="view" value="{{ view }}">
             </form>
 
-            <!-- Priority selection form -->
-            <form hx-post="/todos/{{ todo.id }}/update" hx-target="main" method="post">
-                <label for="priority-{{ todo.id }}">Priority</label>
-                <select name="priority" id="priority-{{ todo.id }}">
-                    <option value="1" {% if todo.priority == 1 %} selected {% endif %}>High</option>
-                    <option value="2" {% if todo.priority == 2 %} selected {% endif %}>Medium</option>
-                    <option value="3" {% if todo.priority == 3 %} selected {% endif %}>Low</option>
-                </select>
-                <button type="submit">Save</button>
-            </form>
+
         {% endif %}
     </li>
 {% endfor %}

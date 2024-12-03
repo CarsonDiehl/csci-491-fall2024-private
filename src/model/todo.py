@@ -44,3 +44,16 @@ class Todo(Model):
 
     class Meta:
         database = db
+
+class Tag(Model):
+    name = CharField()
+    color = CharField()  # Stores color as a string, e.g., "#FF5733"
+
+    @classmethod
+    def all(cls):
+        select = Tag.select()
+        return select
+
+    class Meta:
+        database = db
+

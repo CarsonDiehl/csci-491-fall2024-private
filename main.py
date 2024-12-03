@@ -1,11 +1,11 @@
 from flask import Flask, request, render_template, redirect, jsonify
 import time
-from src.model.todo import Todo, db
+from src.model.todo import Todo, db, Tag
 
 app = Flask(__name__, static_url_path='', static_folder='static')
 
 with db:
-    db.create_tables([Todo])
+    db.create_tables([Todo, Tag])
 
 @app.before_request
 def _db_connect():
@@ -61,6 +61,7 @@ def update_todo(id):
 @app.post('/todos/<id>/update')
 def update_todo_priority(id):
     try:
+        view = request.form.get('view', None)
         todo = Todo.find(int(id))
         todo.priority = int(request.form['priority'])  # Update the priority
         todo.save()
@@ -92,14 +93,15 @@ def all_todos():
     sort_order = request.args.get('sort', 'order')  # Default if no sort option is selected
     # Modify query to handle sorting
     if sort_order == 'priority_desc':
-        todos = Todo.select().order_by(Todo.priority.desc(), Todo.order)  # High to Low
+        todos = Todo.all(view,search).order_by(Todo.priority.desc(), Todo.order)  # High to Low
     elif sort_order == 'priority_asc':
-        todos = Todo.select().order_by(Todo.priority.asc(), Todo.order)  # Low to High
+        todos = Todo.all(view,search).order_by(Todo.priority.asc(), Todo.order)  # Low to High
     else:
-        todos = Todo.select().order_by(Todo.order)
+        todos = Todo.all(view,search).order_by(Todo.order)
     if request.headers.get('HX-Request'):
         return render_template("todos_list.html", todos=todos)
-    return render_template("index.html", todos=todos, view=view, search=search)
+    tags=Tag.all()
+    return render_template("index.html", todos=todos, view=view, search=search, tags=tags)
 
 
 
@@ -115,6 +117,21 @@ def voice_input():
         return jsonify({'success': True}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.get("/new_tag")
+def new_tag():
+    return render_template('new_tag.html')
+
+@app.post("/add_tag")
+def add_tag():
+    new_tag_name = request.form.get("new_tag")
+    tag_color = request.form.get("tag_color", "#0f0f0f")  # Default color if none provided
+
+    if new_tag_name:
+        # Add the new tag to the database
+        new_tag = Tag(name=new_tag_name, color=tag_color)
+        new_tag.save()
+    return redirect('/todos')
 
 if __name__ == '__main__':
     app.run(port=5000)

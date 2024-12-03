@@ -1,3 +1,90 @@
 .center {
     text-align: center;
 }
+
+.tag-label {
+    display: inline-block;
+    margin: 5px;
+}
+.tag-checkbox {
+    display: none;
+}
+.tag-button {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.tag-checkbox:checked + .tag-button {
+    background-color: rgb(153, 200, 1);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Hide the text input, but keep its functionality */
+.tag-input {
+    display: none;
+}
+
+/* Style the "+ Add Tag" button */
+#new-tag-container .tag-button {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* Show the input field when the button is clicked */
+#new-tag-container.editing .tag-input {
+    display: inline-block;
+    width: auto;
+    padding: 5px;
+    border: 1px solid #007bff;
+    border-radius: 3px;
+    outline: none;
+    margin-left: 5px;
+}
+
+#new-tag-container.editing .tag-button {
+    display: none; /* Hide the button while editing */
+}
+
+.tag-label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.tag-checkbox {
+    display: none; /* Hide the actual checkbox */
+}
+
+.tag-button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    background-color: transparent; /* Default background */
+    color: #000; /* Default text color */
+}
+
+.tag-checkbox:checked + .tag-button {
+    background-color: var(--tag-color); /* Dynamic color from tag */
+    color: #fff; /* Optional: Ensure contrast with light text */
+    border-color: var(--tag-color);
+}
+
+input[type="color"] {
+    width: 32px; /* Adjust width */
+    height: 32px; /* Adjust height */
+    padding: 0; /* Remove padding */
+    border: none; /* Optional: Remove border */
+    cursor: pointer; /* Indicate interactivity */
+}
