@@ -14,6 +14,17 @@
                 <option value="3" {% if todo.priority== 3 %} selected {% endif %}>Low</option>
             </select>
 
+            <div class="tag-container">
+                {% for tag in tags %}
+                <label class="tag-label" style="--tag-color: {{ tag.color }}">
+                    <input type="checkbox" name="tags" value="{{ tag.id }}" class="tag-checkbox" {% if tag.id|string in todo.tags %} checked {% endif %}>
+                    <span class="tag-button">
+                        {{ tag.name }}
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+
             <!-- Hidden view field -->
             <input type="hidden" name="view" value="{{ view }}">
 
@@ -37,6 +48,11 @@
                 {% if todo.priority== 1 %} <em style="color:red">Priority: High</em>{% endif %}
                 {% if todo.priority== 2 %} <em style="color:yellow">Priority: Medium</em>{% endif %}
                 {% if todo.priority== 3 %} <em style="color:green">Priority: Low</em>{% endif %}
+                <ul>
+                    {% for tag in todo.resolved_tags %}
+                    <li style="color: {{ tag.color }}">{{ tag.name }}</li>
+                    {% endfor %}
+                </ul>
                 {% else %}
                     {{ todo.text }}
                 {% if todo.priority== 1 %} <em style="color:red">Priority: High</em>{% endif %}

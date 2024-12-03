@@ -53,6 +53,23 @@
             Default Order
         </option>
     </select>
+    <input type="hidden" name="view" value="{{ view }}">
+</form>
+
+<!-- Tag filter dropdown -->
+<form method="get" action="/todos" id="filter-by-tag">
+    <label for="sort-order">Sort by:</label>
+    <select name="tag_filter" id="tag_filter" onchange="this.form.submit()">
+        <option value="default" {% if request.args.get('tag_filter') is none or request.args.get('tag_filter') == 'default' %}selected{% endif %}>
+            Filter by tag...
+        </option>
+        {% for tag in tags %}
+        <option class="tag-filter-option" value="{{ tag.id }}" {% if request.args.get('tag_filter') == tag.id|string %}selected{% endif %}>
+            {{ tag.name }}
+        </option>
+        {% endfor %}
+    </select>
+    <input type="hidden" name="view" value="{{ view }}">
 </form>
 
 <a hx-get="/todos/reorder"

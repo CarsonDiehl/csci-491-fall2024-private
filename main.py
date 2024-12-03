@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, jsonify
 import time
 from src.model.todo import Todo, db, Tag
+from peewee import fn
 
 app = Flask(__name__, static_url_path='', static_folder='static')
 
@@ -49,7 +50,8 @@ def toggle_todo(id):
 def edit_todo(id):
     view = request.args.get('view', None)
     todos = Todo.all(view)
-    return render_template("index.html", todos=todos, editing=int(id), view=view)
+    tags = Tag.all()
+    return render_template("index.html", todos=todos, editing=int(id), view=view, tags = tags)
 
 @app.post('/todos/<id>')
 def update_todo(id):
@@ -57,6 +59,7 @@ def update_todo(id):
     todo = Todo.find(int(id))
     todo.text = request.form['todo']
     todo.priority = int(request.form['priority'])  # Update the priority
+    todo.tags = request.form.getlist('tags')  # Get selected tag IDs as a list
     todo.save()
     return redirect("/todos" + (add_view_context(view)))
 
@@ -72,27 +75,40 @@ def update_todo_order():
     id_list = request.form.getlist('ids')
     Todo.reorder(id_list)
     todos = Todo.all(view)
+    for todo in todos:
+        todo.resolved_tags = [Tag.get_by_id(tag_id) for tag_id in todo.tags]
     return render_template("main.html", todos=todos, view=view,editing=None)
 
 @app.get('/todos')
 def all_todos():
     view = request.args.get('view', None)
     search = request.args.get('q', None)
+    tag_filter = request.args.get('tag_filter', None)
     sort_order = request.args.get('sort', 'order')  # Default if no sort option is selected
+
+    query = Todo.all(view,search)
+    # Filter by tag if tag_filter is provided
+    if tag_filter and tag_filter != 'default':
+        # Use a raw SQL query to filter JSON array
+        query = query.where(
+            fn.json_extract(Todo.tags, '$').contains(tag_filter)
+        )
+
+    print(query)
     # Modify query to handle sorting
     if sort_order == 'priority_desc':
-        todos = Todo.all(view,search).order_by(Todo.priority.desc(), Todo.order)  # High to Low
+        todos = query.order_by(Todo.priority.desc(), Todo.order)  # High to Low
     elif sort_order == 'priority_asc':
-        todos = Todo.all(view,search).order_by(Todo.priority.asc(), Todo.order)  # Low to High
+        todos = query.order_by(Todo.priority.asc(), Todo.order)  # Low to High
     else:
-        todos = Todo.all(view,search).order_by(Todo.order)
+        todos = query.order_by(Todo.order)
     # Resolve tag names for each TODO
     for todo in todos:
         todo.resolved_tags = [Tag.get_by_id(tag_id) for tag_id in todo.tags]
     if request.headers.get('HX-Request'):
         return render_template("todos_list.html", todos=todos)
     tags=Tag.all()
-    return render_template("index.html", todos=todos, view=view, search=search, tags=tags)
+    return render_template("index.html", todos=todos, view=view, search=search, tags=tags, tag_filter=tag_filter)
 
 
 
